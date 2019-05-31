@@ -43,7 +43,7 @@ def checkDB():
 def resetDB():
         cursor.execute('''show tables;''')
         dbTuples = cursor.fetchall()
-        print('result: {0}'.format(dbTuples))
+        #print('result: {0}'.format(dbTuples))
         for dbName in dbTuples:
                         
                 if 'theater' in dbName:
@@ -72,25 +72,46 @@ def printQuery():
 def doCommand(queUser):
         if queUser=='1':
                 tmp1=runQuery(sqlv.printTheater)
-                print(tmp1)
+#                print(tmp1)
+                print("--------------------------------------------------------------------------------")
+                lineIndex = 'id'.ljust(5) + 'name'.ljust(20) + 'location'.ljust(30) + 'capacity'.ljust(10) + 'assigned'.ljust(10)
+                print(lineIndex)
+                print("--------------------------------------------------------------------------------")        
+                for theaterRecord in tmp1:
+                        word=theaterRecord
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(20) + word[2].ljust(30) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
+                        print(lineNew)
+                        
+                print("--------------------------------------------------------------------------------")
+
                 # Need additional manipulation for loading the number of assigned play
 
         elif queUser=='2':
                 tmp2=runQuery(sqlv.printPlay)
-                print(tmp2)
+#                print(tmp2)
+                print("--------------------------------------------------------------------------------")
+                lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'type'.ljust(20) + 'price'.ljust(10) + 'booked'.ljust(10)
+                print(lineIndex)
+                print("--------------------------------------------------------------------------------")        
+                for playRecord in tmp2:
+                        word=playRecord
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
+                        print(lineNew)
+                        
+                print("--------------------------------------------------------------------------------")
+
                 # Need additional manipulation for loading the number of booked audience
 
         elif queUser=='3':
                 tmp3=runQuery(sqlv.printAudience)
                 #print(tmp3)
                 print("--------------------------------------------------------------------------------")
-                lineIndex = 'id'.ljust(10) + 'name'.ljust(50) + 'gender'.ljust(10) + 'age'.ljust(10)
+                lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'gender'.ljust(20) + 'age'.ljust(10)
                 print(lineIndex)
-                print("--------------------------------------------------------------------------------")
-                        
+                print("--------------------------------------------------------------------------------")        
                 for audienceRecord in tmp3:
                         word=audienceRecord
-                        lineNew = str(word[0]).ljust(10) + word[1].ljust(50) + word[2].ljust(10) + str(word[3]).ljust(10)
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10)
                         print(lineNew)
                         
                 print("--------------------------------------------------------------------------------")
