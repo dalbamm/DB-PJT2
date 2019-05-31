@@ -47,3 +47,9 @@ templateinsertPlay = '''INSERT INTO
                 play(name, genre, price)
                 VALUES
                 (%s,%s,%s);'''
+                #template
+
+templateinsertAudience = '''INSERT INTO 
+                audience(name, sex, age)
+                VALUES
+                (%s,%s,%s);'''

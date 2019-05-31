@@ -6,12 +6,13 @@ import dataType as d
 def runQuery(statement):
         cursor.execute(statement)
         result=cursor.fetchall()
-        print('result: {0}'.format(result))
+        #print('result: {0}'.format(result))
+        return result
 
 def runQuery(statement, str1, str2, str3):
         cursor.execute(statement, (str1, str2, str3))
         result=cursor.fetchall()
-        print('result: {0}'.format(result))
+        #print('result: {0}'.format(result))
 
 def truncateString(rawString):
         return rawString[:200]
@@ -123,21 +124,28 @@ def doCommand(queUser):
                 audienceAge=0
                 
                 print('Audience name:', end=' ')
-                playName=truncateString(input())
-                print('Audience type:', end=' ')
-                playGenre=truncateString(input())
-                print('Audience age:', end=' ')
-                playPrice=int(input())
+                audienceName=truncateString(input())
+
+                print('Audience gender:', end=' ')
+                audienceSex=truncateString(input())
                 
-                if(playPrice < 0):
-                        print('Price should be 0 or more')
+                if(audienceSex is not 'M' and audienceSex is not 'F'):
+                        print("Gender should be 'M' or 'F'")
                         return
                 
-                runQuery(sqlv.templateinsertPlay, playName, playGenre, str(playPrice))
+                
+                print('Audience age:', end=' ')
+                audienceAge=int(input())
+                
+                if(audienceAge < 1):
+                        print('Age should be more than 0')
+                        return
+                
+                runQuery(sqlv.templateinsertAudience, audienceName, audienceSex, str(audienceAge))
                 
                 #check whether insertion is operated or not
                 print('An audience is successfully inserted')
-                
+
         elif queUser=='9':
                 9
         elif queUser=='10':
