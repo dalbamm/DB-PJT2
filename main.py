@@ -9,17 +9,18 @@ def runQuery(statement):
         #print('result: {0}'.format(result))
         return result
 
-def runQuery(statement, str1, str2, str3):
+def runQuery3Arg(statement, str1, str2, str3):
         cursor.execute(statement, (str1, str2, str3))
         result=cursor.fetchall()
         #print('result: {0}'.format(result))
+        return result
 
 def truncateString(rawString):
         return rawString[:200]
 def checkDB():
         cursor.execute('''show tables;''')
         dbTuples = cursor.fetchall()
-        print('result: {0}'.format(dbTuples))
+        #print('result: {0}'.format(dbTuples))
         
         theaterExist=False
         playExist=False
@@ -70,11 +71,31 @@ def printQuery():
 
 def doCommand(queUser):
         if queUser=='1':
-                1
+                tmp1=runQuery(sqlv.printTheater)
+                print(tmp1)
+                # Need additional manipulation for loading the number of assigned play
+
         elif queUser=='2':
-                2
+                tmp2=runQuery(sqlv.printPlay)
+                print(tmp2)
+                # Need additional manipulation for loading the number of booked audience
+
         elif queUser=='3':
-                3
+                tmp3=runQuery(sqlv.printAudience)
+                #print(tmp3)
+                print("--------------------------------------------------------------------------------")
+                lineIndex = 'id'.ljust(10) + 'name'.ljust(50) + 'gender'.ljust(10) + 'age'.ljust(10)
+                print(lineIndex)
+                print("--------------------------------------------------------------------------------")
+                        
+                for audienceRecord in tmp3:
+                        word=audienceRecord
+                        lineNew = str(word[0]).ljust(10) + word[1].ljust(50) + word[2].ljust(10) + str(word[3]).ljust(10)
+                        print(lineNew)
+                        
+                print("--------------------------------------------------------------------------------")
+
+
         elif queUser=='4':
                 print('Building name:', end=' ')
                 buildingName=truncateString(input())
@@ -89,7 +110,7 @@ def doCommand(queUser):
                         print('Capacity should be more than 0')
                         return
                 
-                runQuery(sqlv.templateinsertTheater, tmp.name, tmp.location, str(tmp.capacity))
+                runQuery3Arg(sqlv.templateinsertTheater, tmp.name, tmp.location, str(tmp.capacity))
                 #check whether insertion is operated or not
                 print('A building is successfully inserted')
 
@@ -111,7 +132,7 @@ def doCommand(queUser):
                         print('Price should be 0 or more')
                         return
                 
-                runQuery(sqlv.templateinsertPlay, playName, playGenre, str(playPrice))
+                runQuery3Arg(sqlv.templateinsertPlay, playName, playGenre, str(playPrice))
                 
                 #check whether insertion is operated or not
                 print('A performance is successfully inserted')
@@ -141,7 +162,7 @@ def doCommand(queUser):
                         print('Age should be more than 0')
                         return
                 
-                runQuery(sqlv.templateinsertAudience, audienceName, audienceSex, str(audienceAge))
+                runQuery3Arg(sqlv.templateinsertAudience, audienceName, audienceSex, str(audienceAge))
                 
                 #check whether insertion is operated or not
                 print('An audience is successfully inserted')
@@ -163,10 +184,16 @@ def doCommand(queUser):
                 print('Bye!')
                 sys.exit()
         elif queUser=='16':
-                resetDB()
+                ansReset = input("Do you want to reset whole data? input 'y' or 'n': ")
+
+                if(ansReset is 'y'):
+                        resetDB()
+                else:
+                        return
         else:
                 print('Invalid action')
-        
+                return
+
         cntn.commit()
         return
 

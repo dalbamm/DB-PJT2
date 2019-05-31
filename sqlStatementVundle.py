@@ -1,3 +1,12 @@
+#print theater table
+printTheater = '''SELECT * FROM theater;'''
+
+#print play table
+printPlay = '''SELECT * FROM play;'''
+
+#print audience table
+printAudience = '''SELECT * FROM audience;'''
+
 #Create table theater
 crtTheater = '''CREATE TABLE theater (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
