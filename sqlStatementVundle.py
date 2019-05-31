@@ -31,6 +31,14 @@ crtAudience = '''CREATE TABLE audience (
                 age INT UNSIGNED NOT NULL
         );
 '''
+#delete theater table
+deleteTheater = '''DELETE FROM theater where id=%s;'''
+
+#delete play table
+deletePlay = '''DELETE FROM play where id=%s;'''
+
+#delete audience table
+deleteAudience = '''DELETE FROM audience where id=%s;'''
 
 #drop table theater
 dropTheater = '''DROP TABLE theater;'''
