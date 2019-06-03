@@ -32,6 +32,14 @@ crtAudience = '''CREATE TABLE audience (
                 age INT UNSIGNED NOT NULL
         );
 '''
+#Create table booking
+crtBooking = '''CREATE TABLE booking (
+                id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                playId INT UNSIGNED NOT NULL,
+                seatNum INT UNSIGNED NOT NULL,
+                audienceId INT UNSIGNED NOT NULL                
+        );
+'''
 #delete theater table
 deleteTheater = '''DELETE FROM theater where id=%s;'''
 
@@ -49,6 +57,9 @@ dropPlay = '''DROP TABLE play;'''
 
 #drop table audience
 dropAudience = '''DROP TABLE audience;'''
+
+#drop table audience
+dropBooking = '''DROP TABLE booking;'''
                                            
 #Insert row in table
 def insertTheater(name, location, capacity):
@@ -72,6 +83,12 @@ templateinsertAudience = '''INSERT INTO
                 VALUES
                 (%s,%s,%s);'''
 
+templateinsertBooking = '''INSERT INTO 
+                booking(playId, seatNum, audienceId)
+                VALUES
+                (%s,%s,%s);'''
+
+
 #print an element table template
 selectTheaterInPlay = '''SELECT theater FROM play where id=%s;'''
 
@@ -80,3 +97,11 @@ updateTheaterInPlay = '''UPDATE play SET theater=%s where id=%s;'''
 countTheaterInPlay = '''SELECT count(theater) FROM play where theater=%s;'''
 
 selectInPlayUsingTheater = '''SELECT * FROM play where theater=%s;'''
+
+selectCapacityInTheater = '''SELECT capacity FROM theater where id=%s;'''
+
+selectInPlay = '''SELECT * FROM play where id=%s;'''
+
+checkDuplicationInBooking = '''SELECT * FROM booking where playId=%s AND seatNum=%s;'''
+
+selectAgeInAudience = '''SELECT age FROM audience where id=%s;'''

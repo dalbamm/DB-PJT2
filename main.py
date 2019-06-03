@@ -1,4 +1,4 @@
-import pymysql, sys
+import pymysql, sys, math
 import sqlStatementVundle as sqlv
 import dataType as d
 
@@ -37,6 +37,7 @@ def checkDB():
         theaterExist=False
         playExist=False
         audienceExist=False
+        bookingExist=False
         
         for dbName in dbTuples:                
                 if 'theater' in dbName:
@@ -45,12 +46,16 @@ def checkDB():
                         playExist = True
                 elif 'audience' in dbName:
                         audienceExist = True
+                elif 'booking' in dbName:
+                        bookingExist = True
         if theaterExist is False:
                 runQuery(sqlv.crtTheater)
         if playExist is False:
                 runQuery(sqlv.crtPlay)
         if audienceExist is False:
                 runQuery(sqlv.crtAudience)
+        if bookingExist is False:
+                runQuery(sqlv.crtBooking)
         
 def resetDB():
         cursor.execute('''show tables;''')
@@ -67,6 +72,9 @@ def resetDB():
                 if 'audience' in dbName:
                         #drop table audience
                         runQuery(sqlv.dropAudience)
+                if 'booking' in dbName:
+                        #drop table booking
+                        runQuery(sqlv.dropBooking)
         
         #create theater table
         runQuery(sqlv.crtTheater)
@@ -77,9 +85,22 @@ def resetDB():
         #create audience table
         runQuery(sqlv.crtAudience)
         
+        #create booking table
+        runQuery(sqlv.crtBooking)
+        
 def printQuery():
        que = '============================================================\n1. print all buildings\n2. print all performances\n3. print all audiences\n4. insert a new building\n5. remove a building\n6. insert a new performance\n7. remove a performance\n8. insert a new audience\n9. remove an audience\n10. assign a performance to a building\n11. book a performance\n12. print all performances which assigned at a building\n13. print all audiences who booked for a performance\n14. print ticket booking status of a performance\n15. exit\n16. reset database\n============================================================\nSelect your action:'
        print(que, end=' ')
+
+def discountRate(age):
+        if age <= 7:
+                return 0.0
+        elif age <= 12:
+                return 0.5
+        elif age <= 18:
+                return 0.8
+        else:
+                return 1.0
 
 def doCommand(queUser):
         if queUser=='1':
@@ -263,7 +284,59 @@ def doCommand(queUser):
                         print("Performance {0} is already assigned".format(PfId))
 
         elif queUser=='11':
-                11
+                PfId=int(input("Performance ID: "))
+                AdId=int(input("Audience ID: "))
+                RawSeatNumList=input("Seat number: ")
+                tmp11_1=runQuery1Arg(sqlv.selectInPlay, str(PfId))
+                print(tmp11_1)
+                BdId=tmp11_1[0][4]
+                capacity=0
+                if BdId is not None:
+                        tmp11_1_1=runQuery1Arg(sqlv.selectCapacityInTheater, str(BdId))
+                        capacity=tmp11_1_1[0][0]
+                else:
+                        print("Performance {0} isn't assigned".format(PfId))
+                        return
+
+
+
+                RawSeatNumList = RawSeatNumList.replace(' ','').split(',')
+                SeatNumList=list()
+                try:
+                        for seatNum in RawSeatNumList:
+                                #check if the number is not out of range
+                                if int(seatNum) > capacity or int(seatNum) < 1:
+                                        print('Seat number out of range')
+                                        return
+                                #check if the number is not in booking table
+                                tmp11_2=runQuery2Arg(sqlv.checkDuplicationInBooking, str(PfId), str(seatNum))
+                                if tmp11_2 is not ():
+                                        print('The seat is already taken')
+                                        return
+                                
+                                tmp11_2 = runQuery3Arg(sqlv.templateinsertBooking, str(PfId), str(seatNum), str(AdId))
+                                SeatNumList.append(int(seatNum))
+                                #print(tmp11_2)
+
+                #Catch unacceptable input
+                except ValueError:
+                        print("Error: Input seat number as number type")
+                        return
+                price = tmp11_1[0][3]
+                tmp11_3 = runQuery1Arg(sqlv.selectAgeInAudience, str(AdId))
+                age = tmp11_3[0][0]
+                dc = discountRate(age)
+                print(dc)
+                print(price*len(SeatNumList)*dc)
+                # rounding up from ONLY first fractional number.
+                print( math.ceil( int( price*len(SeatNumList) * dc * 10)/10.0    ) )
+                
+#                if rst10[0][0] is None:
+                        #rst10=runQuery2Arg(sqlv.updateTheaterInPlay, str(bdId), str(PfId) )
+                        #print("Successfully book a performance")
+ #               else:
+                        #print("Performance {0} is already assigned".format(PfId))
+
         elif queUser=='12':
                 bdId=int(input("Building ID: "))
                 idExist=False
@@ -275,7 +348,7 @@ def doCommand(queUser):
                                 break
                 if idExist is True:
                         rst12=runQuery1Arg(sqlv.selectInPlayUsingTheater, str(bdId))
-                        print(rst12)
+                        #print(rst12)
                         print("--------------------------------------------------------------------------------")
                         lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'type'.ljust(20) + 'price'.ljust(10) + 'booked'.ljust(10)
                         print(lineIndex)
@@ -284,7 +357,6 @@ def doCommand(queUser):
                                 word=playRecord
                                 lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
                                 print(lineNew)
-                                
                         print("--------------------------------------------------------------------------------")
 
                 else:
