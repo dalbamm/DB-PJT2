@@ -47,9 +47,9 @@ def checkDB():
                         audienceExist = True
         if theaterExist is False:
                 runQuery(sqlv.crtTheater)
-        if theaterExist is False:
+        if playExist is False:
                 runQuery(sqlv.crtPlay)
-        if theaterExist is False:
+        if audienceExist is False:
                 runQuery(sqlv.crtAudience)
         
 def resetDB():
@@ -84,19 +84,19 @@ def printQuery():
 def doCommand(queUser):
         if queUser=='1':
                 tmp1=runQuery(sqlv.printTheater)
-#                print(tmp1)
                 print("--------------------------------------------------------------------------------")
                 lineIndex = 'id'.ljust(5) + 'name'.ljust(20) + 'location'.ljust(30) + 'capacity'.ljust(10) + 'assigned'.ljust(10)
                 print(lineIndex)
                 print("--------------------------------------------------------------------------------")        
                 for theaterRecord in tmp1:
                         word=theaterRecord
-                        lineNew = str(word[0]).ljust(5) + word[1].ljust(20) + word[2].ljust(30) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
-                        print(lineNew)
-                        
-                print("--------------------------------------------------------------------------------")
+                        tmp1_1=runQuery1Arg(sqlv.countTheaterInPlay, str(word[0]))
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(20) + word[2].ljust(30) + str(word[3]).ljust(10) + str(tmp1_1[0][0]).ljust(10)
 
-                # Need additional manipulation for loading the number of assigned play
+                        print(lineNew)
+
+                        
+                print("--------------------------------------------------------------------------------")                
 
         elif queUser=='2':
                 tmp2=runQuery(sqlv.printPlay)
@@ -256,11 +256,6 @@ def doCommand(queUser):
                 bdId=int(input("Building ID: "))
                 PfId=int(input("Performance ID: "))
                 rst10=runQuery1Arg(sqlv.selectTheaterInPlay, str(PfId))
-                print(rst10)
-                print(rst10[0])
-                print(type(rst10[0]))
-                print(rst10[0][0])
-                print(type(rst10[0][0]))
                 if rst10[0][0] is None:
                         rst10=runQuery2Arg(sqlv.updateTheaterInPlay, str(bdId), str(PfId) )
                         print("Successfully assign a performance")
@@ -270,7 +265,31 @@ def doCommand(queUser):
         elif queUser=='11':
                 11
         elif queUser=='12':
-                12
+                bdId=int(input("Building ID: "))
+                idExist=False
+                tmp12=runQuery(sqlv.printTheater)
+                for theaterRecord in tmp12:
+                        id=theaterRecord[0]
+                        if id is bdId:
+                                idExist=True
+                                break
+                if idExist is True:
+                        rst12=runQuery1Arg(sqlv.selectInPlayUsingTheater, str(bdId))
+                        print(rst12)
+                        print("--------------------------------------------------------------------------------")
+                        lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'type'.ljust(20) + 'price'.ljust(10) + 'booked'.ljust(10)
+                        print(lineIndex)
+                        print("--------------------------------------------------------------------------------")        
+                        for playRecord in rst12:
+                                word=playRecord
+                                lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
+                                print(lineNew)
+                                
+                        print("--------------------------------------------------------------------------------")
+
+                else:
+                        print("Building {0} doesn't exist".format(str(bdId)))
+
         elif queUser=='13':
                 13
         elif queUser=='14':

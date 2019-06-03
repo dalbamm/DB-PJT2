@@ -76,3 +76,7 @@ templateinsertAudience = '''INSERT INTO
 selectTheaterInPlay = '''SELECT theater FROM play where id=%s;'''
 
 updateTheaterInPlay = '''UPDATE play SET theater=%s where id=%s;'''
+
+countTheaterInPlay = '''SELECT count(theater) FROM play where theater=%s;'''
+
+selectInPlayUsingTheater = '''SELECT * FROM play where theater=%s;'''
