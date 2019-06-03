@@ -21,7 +21,9 @@ class building:
               self.bb=b
               self.bc=c
 
-a = building()
-print(a.ba)
-a.re(1,2,3)
-print(a.ba)
+# a = building()
+# print(a.ba)
+# a.re(1,2,3)
+# print(a.ba)
+a = 1
+print("test {0}".format(a))

@@ -15,6 +15,12 @@ def runQuery1Arg(statement, str1):
         #print('result: {0}'.format(result))
         return result
 
+def runQuery2Arg(statement, str1, str2):
+        cursor.execute(statement, (str1,str2))
+        result=cursor.fetchall()
+        #print('result: {0}'.format(result))
+        return result
+
 def runQuery3Arg(statement, str1, str2, str3):
         cursor.execute(statement, (str1, str2, str3))
         result=cursor.fetchall()
@@ -142,21 +148,21 @@ def doCommand(queUser):
                 print('A building is successfully inserted')
 
         elif queUser=='5':
-                wantDelete=input("Building ID: ")
+                wantDelete=int(input("Building ID: "))
                 idExist=False
 
                 tmp5=runQuery(sqlv.printTheater)
                 for theaterRecord in tmp5:
                         id=theaterRecord[0]
-                        if id is int(wantDelete):
+                        if id is wantDelete:
                                 idExist=True
                                 break
                 if idExist is True:
-                        tmp5=runQuery1Arg(sqlv.deleteTheater, wantDelete)
+                        tmp5=runQuery1Arg(sqlv.deleteTheater, str(wantDelete))
                         print("A building is 7successfully removed")
                         
                 else:
-                        print("Building {0} doesn't exist".format(wantDelete))
+                        print("Building {0} doesn't exist".format(str(wantDelete)))
                 #Need cascading deletion implementation
 
                 
@@ -182,21 +188,21 @@ def doCommand(queUser):
                 print('A performance is successfully inserted')
 
         elif queUser=='7':
-                wantDelete=input("Performance ID: ")
+                wantDelete=int(input("Performance ID: "))
                 idExist=False
 
                 tmp7=runQuery(sqlv.printPlay)
                 for playRecord in tmp7:
                         id=playRecord[0]
-                        if id is int(wantDelete):
+                        if id is wantDelete:
                                 idExist=True
                                 break
                 if idExist is True:
-                        tmp7=runQuery1Arg(sqlv.deletePlay, wantDelete)
+                        tmp7=runQuery1Arg(sqlv.deletePlay, str(wantDelete))
                         print("A performance is successfully removed")
                         
                 else:
-                        print("Performance {0} doesn't exist".format(wantDelete))
+                        print("Performance {0} doesn't exist".format(str(wantDelete)))
                 #Need cascading deletion implementation
 
 
@@ -229,25 +235,38 @@ def doCommand(queUser):
                 print('An audience is successfully inserted')
 
         elif queUser=='9':
-                wantDelete=input("Audience ID: ")
+                wantDelete=int(input("Audience ID: "))
                 idExist=False
 
                 tmp9=runQuery(sqlv.printAudience)
                 for audienceRecord in tmp9:
                         id=audienceRecord[0]
-                        if id is int(wantDelete):
+                        if id is wantDelete:
                                 idExist=True
                                 break
                 if idExist is True:
-                        tmp9=runQuery1Arg(sqlv.deleteAudience, wantDelete)
+                        tmp9=runQuery1Arg(sqlv.deleteAudience, str(wantDelete))
                         print("An audience is successfully removed")
                         
                 else:
-                        print("Audience {0} doesn't exist".format(wantDelete))
+                        print("Audience {0} doesn't exist".format(str(wantDelete)))
                 #Need cascading deletion implementation
 
         elif queUser=='10':
-                10
+                bdId=int(input("Building ID: "))
+                PfId=int(input("Performance ID: "))
+                rst10=runQuery1Arg(sqlv.selectTheaterInPlay, str(PfId))
+                print(rst10)
+                print(rst10[0])
+                print(type(rst10[0]))
+                print(rst10[0][0])
+                print(type(rst10[0][0]))
+                if rst10[0][0] is None:
+                        rst10=runQuery2Arg(sqlv.updateTheaterInPlay, str(bdId), str(PfId) )
+                        print("Successfully assign a performance")
+                else:
+                        print("Performance {0} is already assigned".format(PfId))
+
         elif queUser=='11':
                 11
         elif queUser=='12':

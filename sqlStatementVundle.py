@@ -20,7 +20,8 @@ crtPlay = '''CREATE TABLE play (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 name varchar(200) COLLATE utf8_bin NOT NULL,
                 genre varchar(200) COLLATE utf8_bin NOT NULL,
-                price INT UNSIGNED NOT NULL
+                price INT UNSIGNED NOT NULL,
+                theater INT UNSIGNED
         );
 '''
 #Create table audience
@@ -70,3 +71,8 @@ templateinsertAudience = '''INSERT INTO
                 audience(name, sex, age)
                 VALUES
                 (%s,%s,%s);'''
+
+#print an element table template
+selectTheaterInPlay = '''SELECT theater FROM play where id=%s;'''
+
+updateTheaterInPlay = '''UPDATE play SET theater=%s where id=%s;'''
