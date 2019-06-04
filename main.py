@@ -1,3 +1,6 @@
+#todo: implement cascading deletion
+ #todo: implement labeling point in price number
+
 import pymysql, sys, math
 import sqlStatementVundle as sqlv
 import dataType as d
@@ -29,6 +32,10 @@ def runQuery3Arg(statement, str1, str2, str3):
 
 def truncateString(rawString):
         return rawString[:200]
+
+def addCommas(val):
+        return format(val,",")
+
 def checkDB():
         cursor.execute('''show tables;''')
         dbTuples = cursor.fetchall()
@@ -88,6 +95,11 @@ def resetDB():
         #create booking table
         runQuery(sqlv.crtBooking)
         
+def sortTuple(tuple1):
+        x=list(tuple1)
+        x.sort()
+        return tuple(x)
+                
 def printQuery():
        que = '============================================================\n1. print all buildings\n2. print all performances\n3. print all audiences\n4. insert a new building\n5. remove a building\n6. insert a new performance\n7. remove a performance\n8. insert a new audience\n9. remove an audience\n10. assign a performance to a building\n11. book a performance\n12. print all performances which assigned at a building\n13. print all audiences who booked for a performance\n14. print ticket booking status of a performance\n15. exit\n16. reset database\n============================================================\nSelect your action:'
        print(que, end=' ')
@@ -128,7 +140,8 @@ def doCommand(queUser):
                 print("--------------------------------------------------------------------------------")        
                 for playRecord in tmp2:
                         word=playRecord
-                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
+                        tmp2_1=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId,str(word[0]))
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + str(len(tmp2_1)).ljust(10)
                         print(lineNew)
                         
                 print("--------------------------------------------------------------------------------")
@@ -286,9 +299,9 @@ def doCommand(queUser):
         elif queUser=='11':
                 PfId=int(input("Performance ID: "))
                 AdId=int(input("Audience ID: "))
-                RawSeatNumList=input("Seat number: ")
+                RawSeatNumList=truncateString(input("Seat number: "))
                 tmp11_1=runQuery1Arg(sqlv.selectInPlay, str(PfId))
-                print(tmp11_1)
+                # print(tmp11_1)
                 BdId=tmp11_1[0][4]
                 capacity=0
                 if BdId is not None:
@@ -322,21 +335,19 @@ def doCommand(queUser):
                 except ValueError:
                         print("Error: Input seat number as number type")
                         return
+                
+                #Calculate total price of the reservation
                 price = tmp11_1[0][3]
                 tmp11_3 = runQuery1Arg(sqlv.selectAgeInAudience, str(AdId))
                 age = tmp11_3[0][0]
                 dc = discountRate(age)
-                print(dc)
-                print(price*len(SeatNumList)*dc)
-                # rounding up from ONLY first fractional number.
-                print( math.ceil( int( price*len(SeatNumList) * dc * 10)/10.0    ) )
                 
-#                if rst10[0][0] is None:
-                        #rst10=runQuery2Arg(sqlv.updateTheaterInPlay, str(bdId), str(PfId) )
-                        #print("Successfully book a performance")
- #               else:
-                        #print("Performance {0} is already assigned".format(PfId))
-
+                # rounding up from ONLY first fractional number(truncate below fractional numbers).
+                print("Successfully book a performance")
+                rst11=math.ceil( int( price*len(SeatNumList) * dc * 10)/10.0    )
+                rst11=addCommas(rst11)
+                print( "Total ticket price is {0}".format(rst11))
+                
         elif queUser=='12':
                 bdId=int(input("Building ID: "))
                 idExist=False
@@ -355,7 +366,10 @@ def doCommand(queUser):
                         print("--------------------------------------------------------------------------------")        
                         for playRecord in rst12:
                                 word=playRecord
-                                lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
+                                tmp12_1=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId,str(word[0]))
+                                lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + str(len(tmp12_1)).ljust(10)
+
+                                # lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
                                 print(lineNew)
                         print("--------------------------------------------------------------------------------")
 
@@ -363,13 +377,67 @@ def doCommand(queUser):
                         print("Building {0} doesn't exist".format(str(bdId)))
 
         elif queUser=='13':
-                13
+                PfId=int(input("Performance ID: "))
+
+                tmp13=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId, PfId)
+
+                #Print the result of the search
+                tmp13=sortTuple(tmp13)
+                #print(tmp13)
+                        
+                print("--------------------------------------------------------------------------------")
+                lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'gender'.ljust(20) + 'age'.ljust(10)
+                print(lineIndex)
+                print("--------------------------------------------------------------------------------")        
+                for bookingRecord in tmp13:
+                        tmp13_1=runQuery1Arg(sqlv.selectInAudience, str(bookingRecord[0]))
+                        for audienceRecord in tmp13_1:
+                                word=audienceRecord
+                                lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10)
+                                print(lineNew)                        
+                print("--------------------------------------------------------------------------------")
+                
+
         elif queUser=='14':
-                14
+                PfId=int(input("Performance ID: "))
+                
+                tmp14=runQuery1Arg(sqlv.selectInPlay, PfId)
+                
+                #Check if PfId exists in play table.
+                if tmp14 is ():
+                        print("Performance {0} doesn't exist".format(PfId))
+                        return
+
+                #Check if the performance have assigned.
+                if tmp14[0][4] is None:
+                        print("Performance {0} isn't assigned".format(PfId))
+                        return
+
+                #Get capacity of the building
+                BdId = tmp14[0][4]
+                tmp14_1 = runQuery1Arg(sqlv.selectCapacityInTheater, str( BdId))
+                print(tmp14_1)
+                capa = tmp14_1[0][0]
+                print(capa)
+                #Print the result of the search
+                tmp14=runQuery1Arg(sqlv.selectInBookingUsingPlayId, PfId)
+                tmp14 = sortTuple(tmp14)
+                print("--------------------------------------------------------------------------------")
+                lineIndex = 'seat_number'.ljust(20) + 'audience_id'.ljust(20)
+                print(lineIndex)
+                print("--------------------------------------------------------------------------------")        
+                for bookingRecord in tmp14:
+                        word=bookingRecord
+                        lineNew = str(word[0]).ljust(20) + str(word[1]).ljust(20)
+                        print(lineNew)                        
+                print("--------------------------------------------------------------------------------")
+                
+
         elif queUser=='15':
                 cntn.close()
                 print('Bye!')
                 sys.exit()
+
         elif queUser=='16':
                 ansReset = input("Do you want to reset whole data? input 'y' or 'n': ")
 

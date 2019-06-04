@@ -105,3 +105,9 @@ selectInPlay = '''SELECT * FROM play where id=%s;'''
 checkDuplicationInBooking = '''SELECT * FROM booking where playId=%s AND seatNum=%s;'''
 
 selectAgeInAudience = '''SELECT age FROM audience where id=%s;'''
+
+selectInBookingUsingPlayId = '''SELECT seatNum, audienceId FROM booking where playId=%s;'''
+
+selectAudienceIdInBookingUsingPlayId = '''SELECT distinct(audienceId) FROM booking where playId=%s;'''
+
+selectInAudience = '''SELECT * FROM audience where id=%s ORDER BY id, name, sex, age desc;'''
