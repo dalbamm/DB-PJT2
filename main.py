@@ -191,14 +191,30 @@ def doCommand(queUser):
                 idExist=False
 
                 tmp5=runQuery(sqlv.printTheater)
+
                 for theaterRecord in tmp5:
                         id=theaterRecord[0]
                         if id is wantDelete:
                                 idExist=True
                                 break
+
                 if idExist is True:
-                        tmp5=runQuery1Arg(sqlv.deleteTheater, str(wantDelete))
-                        print("A building is 7successfully removed")
+                        #Get performance Ids filtered by theater Id
+                        cascadedPlayIdList=runQuery1Arg(sqlv.selectIdInPlayUsingTheater, str(wantDelete))
+                        
+                        for play in cascadedPlayIdList:
+                                PfId=play[0]
+                                
+                                #Delete reservation data filtered by performance Id
+                                tmp5=runQuery1Arg(sqlv.deleteBookingUsingPlayId, str(PfId))
+                                
+                                #Update the value of assigned theater into NULL value which are allocated in the building
+                                runQuery2Arg(sqlv.updateTheaterInPlay,None, PfId)
+                                
+                                #Consequently, delete building data     
+                                tmp5=runQuery1Arg(sqlv.deleteTheater, str(wantDelete))
+
+                        print("A building is successfully removed")
                         
                 else:
                         print("Building {0} doesn't exist".format(str(wantDelete)))
@@ -237,6 +253,7 @@ def doCommand(queUser):
                                 idExist=True
                                 break
                 if idExist is True:
+                        tmp7=runQuery1Arg(sqlv.deleteBookingUsingPlayId, str(wantDelete))                
                         tmp7=runQuery1Arg(sqlv.deletePlay, str(wantDelete))
                         print("A performance is successfully removed")
                         
@@ -284,12 +301,15 @@ def doCommand(queUser):
                                 idExist=True
                                 break
                 if idExist is True:
+                        #Need cascading deletion implementation
+                        tmp9=runQuery1Arg(sqlv.deleteBookingUsingAudienceId, str(wantDelete))
                         tmp9=runQuery1Arg(sqlv.deleteAudience, str(wantDelete))
                         print("An audience is successfully removed")
                         
                 else:
                         print("Audience {0} doesn't exist".format(str(wantDelete)))
-                #Need cascading deletion implementation
+                        return
+                
 
         elif queUser=='10':
                 bdId=int(input("Building ID: "))

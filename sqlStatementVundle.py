@@ -49,6 +49,14 @@ deletePlay = '''DELETE FROM play where id=%s;'''
 #delete audience table
 deleteAudience = '''DELETE FROM audience where id=%s;'''
 
+#delete in booking table
+deleteBookingUsingPlayId = '''DELETE FROM booking where playId=%s;'''
+
+#delete in booking table
+deleteBookingUsingAudienceId = '''DELETE FROM booking where audienceId=%s;'''
+
+
+
 #drop table theater
 dropTheater = '''DROP TABLE theater;'''
 
@@ -111,3 +119,6 @@ selectInBookingUsingPlayId = '''SELECT seatNum, audienceId FROM booking where pl
 selectAudienceIdInBookingUsingPlayId = '''SELECT distinct(audienceId) FROM booking where playId=%s;'''
 
 selectInAudience = '''SELECT * FROM audience where id=%s ORDER BY id, name, sex, age desc;'''
+
+selectIdInPlayUsingTheater = '''SELECT id FROM play where theater=%s;'''
+
