@@ -1,5 +1,4 @@
-#todo: implement cascading deletion
-
+#DB 19-1 PJT 2 submission
 import pymysql, sys, math
 import sqlStatementVundle as sqlv
 import dataType as d
@@ -8,25 +7,21 @@ import dataType as d
 def runQuery(statement):
         cursor.execute(statement)
         result=cursor.fetchall()
-        #print('result: {0}'.format(result))
         return result
 
 def runQuery1Arg(statement, str1):
         cursor.execute(statement, (str1))
         result=cursor.fetchall()
-        #print('result: {0}'.format(result))
         return result
 
 def runQuery2Arg(statement, str1, str2):
         cursor.execute(statement, (str1,str2))
         result=cursor.fetchall()
-        #print('result: {0}'.format(result))
         return result
 
 def runQuery3Arg(statement, str1, str2, str3):
         cursor.execute(statement, (str1, str2, str3))
         result=cursor.fetchall()
-        #print('result: {0}'.format(result))
         return result
 
 def truncateString(rawString):
@@ -44,7 +39,6 @@ def initList(capa):
 def checkDB():
         cursor.execute('''show tables;''')
         dbTuples = cursor.fetchall()
-        #print('result: {0}'.format(dbTuples))
         
         theaterExist=False
         playExist=False
@@ -72,7 +66,6 @@ def checkDB():
 def resetDB():
         cursor.execute('''show tables;''')
         dbTuples = cursor.fetchall()
-        #print('result: {0}'.format(dbTuples))
         for dbName in dbTuples:
                         
                 if 'theater' in dbName:
@@ -119,6 +112,45 @@ def discountRate(age):
         else:
                 return 1.0
 
+def checkBuilding(checkId):
+        
+        idExist=False
+
+        tmp=runQuery(sqlv.printTheater)
+
+        for theaterRecord in tmp:
+                id=theaterRecord[0]
+                if id is checkId:
+                        idExist=True
+                        break
+        return idExist
+
+def checkPerformance(checkId):
+        
+        idExist=False
+
+        tmp=runQuery(sqlv.printPlay)
+
+        for playRecord in tmp:
+                id=playRecord[0]
+                if id is checkId:
+                        idExist=True
+                        break
+        return idExist
+
+def checkAudience(checkId):
+        
+        idExist=False
+
+        tmp=runQuery(sqlv.printAudience)
+
+        for audRecord in tmp:
+                id=audRecord[0]
+                if id is checkId:
+                        idExist=True
+                        break
+        return idExist
+
 def doCommand(queUser):
         if queUser=='1':
                 tmp1=runQuery(sqlv.printTheater)
@@ -128,6 +160,7 @@ def doCommand(queUser):
                 print("--------------------------------------------------------------------------------")        
                 for theaterRecord in tmp1:
                         word=theaterRecord
+                        # Additional manipulation for loading the number of assigned performances
                         tmp1_1=runQuery1Arg(sqlv.countTheaterInPlay, str(word[0]))
                         lineNew = str(word[0]).ljust(5) + word[1].ljust(20) + word[2].ljust(30) + str(word[3]).ljust(10) + str(tmp1_1[0][0]).ljust(10)
 
@@ -138,24 +171,23 @@ def doCommand(queUser):
 
         elif queUser=='2':
                 tmp2=runQuery(sqlv.printPlay)
-#                print(tmp2)
                 print("--------------------------------------------------------------------------------")
                 lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'type'.ljust(20) + 'price'.ljust(10) + 'booked'.ljust(10)
                 print(lineIndex)
                 print("--------------------------------------------------------------------------------")        
                 for playRecord in tmp2:
                         word=playRecord
-                        tmp2_1=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId,str(word[0]))
-                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + str(len(tmp2_1)).ljust(10)
+                        # Additional manipulation for loading the number of booked audience
+                        # tmp2_1=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId,str(word[0]))
+                        tmp2_2=runQuery1Arg(sqlv.selectInBookingUsingPlayId,  str(word[0]))
+                        lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + str(len(tmp2_2)).ljust(10)
                         print(lineNew)
                         
                 print("--------------------------------------------------------------------------------")
 
-                # Need additional manipulation for loading the number of booked audience
 
         elif queUser=='3':
                 tmp3=runQuery(sqlv.printAudience)
-                #print(tmp3)
                 print("--------------------------------------------------------------------------------")
                 lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'gender'.ljust(20) + 'age'.ljust(10)
                 print(lineIndex)
@@ -183,7 +215,6 @@ def doCommand(queUser):
                         return
                 
                 runQuery3Arg(sqlv.templateinsertTheater, tmp.name, tmp.location, str(tmp.capacity))
-                #check whether insertion is operated or not
                 print('A building is successfully inserted')
 
         elif queUser=='5':
@@ -218,7 +249,6 @@ def doCommand(queUser):
                         
                 else:
                         print("Building {0} doesn't exist".format(str(wantDelete)))
-                #Need cascading deletion implementation
 
                 
         elif queUser=='6':
@@ -239,7 +269,6 @@ def doCommand(queUser):
                 
                 runQuery3Arg(sqlv.templateinsertPlay, playName, playGenre, str(playPrice))
                 
-                #check whether insertion is operated or not
                 print('A performance is successfully inserted')
 
         elif queUser=='7':
@@ -253,13 +282,13 @@ def doCommand(queUser):
                                 idExist=True
                                 break
                 if idExist is True:
+                        # cascading deletion implementation
                         tmp7=runQuery1Arg(sqlv.deleteBookingUsingPlayId, str(wantDelete))                
                         tmp7=runQuery1Arg(sqlv.deletePlay, str(wantDelete))
                         print("A performance is successfully removed")
                         
                 else:
                         print("Performance {0} doesn't exist".format(str(wantDelete)))
-                #Need cascading deletion implementation
 
 
         elif queUser=='8':
@@ -287,7 +316,6 @@ def doCommand(queUser):
                 
                 runQuery3Arg(sqlv.templateinsertAudience, audienceName, audienceSex, str(audienceAge))
                 
-                #check whether insertion is operated or not
                 print('An audience is successfully inserted')
 
         elif queUser=='9':
@@ -301,7 +329,7 @@ def doCommand(queUser):
                                 idExist=True
                                 break
                 if idExist is True:
-                        #Need cascading deletion implementation
+                        #cascading deletion implementation
                         tmp9=runQuery1Arg(sqlv.deleteBookingUsingAudienceId, str(wantDelete))
                         tmp9=runQuery1Arg(sqlv.deleteAudience, str(wantDelete))
                         print("An audience is successfully removed")
@@ -313,20 +341,42 @@ def doCommand(queUser):
 
         elif queUser=='10':
                 bdId=int(input("Building ID: "))
+                if checkBuilding(bdId) is False:
+                        print("Building {0} doesn't exist".format(str(bdId)))
+                        return
+                
                 PfId=int(input("Performance ID: "))
+                if checkPerformance(PfId) is False:
+                        print("Performance {0} doesn't exist".format(str(PfId)))
+                        return
+                
+                tmp10=runQuery(sqlv.printTheater)
+                tmp10_1=runQuery(sqlv.printPlay)
+
+                
                 rst10=runQuery1Arg(sqlv.selectTheaterInPlay, str(PfId))
                 if rst10[0][0] is None:
                         rst10=runQuery2Arg(sqlv.updateTheaterInPlay, str(bdId), str(PfId) )
                         print("Successfully assign a performance")
                 else:
                         print("Performance {0} is already assigned".format(PfId))
+                
+
 
         elif queUser=='11':
                 PfId=int(input("Performance ID: "))
+                if checkPerformance(PfId) is False:
+                        print("Performance {0} doesn't exist".format(str(PfId)))
+                        return
+                        
                 AdId=int(input("Audience ID: "))
+                if checkAudience(AdId) is False:
+                        print("Audience {0} doesn't exist".format(str(AdId)))
+                        return
+                
+
                 RawSeatNumList=truncateString(input("Seat number: "))
                 tmp11_1=runQuery1Arg(sqlv.selectInPlay, str(PfId))
-                # print(tmp11_1)
                 BdId=tmp11_1[0][4]
                 capacity=0
                 if BdId is not None:
@@ -335,8 +385,6 @@ def doCommand(queUser):
                 else:
                         print("Performance {0} isn't assigned".format(PfId))
                         return
-
-
 
                 RawSeatNumList = RawSeatNumList.replace(' ','').split(',')
                 SeatNumList=list()
@@ -352,15 +400,16 @@ def doCommand(queUser):
                                         print('The seat is already taken')
                                         return
                                 
-                                tmp11_2 = runQuery3Arg(sqlv.templateinsertBooking, str(PfId), str(seatNum), str(AdId))
                                 SeatNumList.append(int(seatNum))
-                                #print(tmp11_2)
 
                 #Catch unacceptable input
                 except ValueError:
                         print("Error: Input seat number as number type")
                         return
-                
+
+                for seatNum in SeatNumList:
+                        tmp11_2 = runQuery3Arg(sqlv.templateinsertBooking, str(PfId), str(seatNum), str(AdId))
+
                 #Calculate total price of the reservation
                 price = tmp11_1[0][3]
                 tmp11_3 = runQuery1Arg(sqlv.selectAgeInAudience, str(AdId))
@@ -384,17 +433,15 @@ def doCommand(queUser):
                                 break
                 if idExist is True:
                         rst12=runQuery1Arg(sqlv.selectInPlayUsingTheater, str(bdId))
-                        #print(rst12)
                         print("--------------------------------------------------------------------------------")
                         lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'type'.ljust(20) + 'price'.ljust(10) + 'booked'.ljust(10)
                         print(lineIndex)
                         print("--------------------------------------------------------------------------------")        
                         for playRecord in rst12:
                                 word=playRecord
-                                tmp12_1=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId,str(word[0]))
+                                tmp12_1=runQuery1Arg(sqlv.selectInBookingUsingPlayId,str(word[0]))
                                 lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + str(len(tmp12_1)).ljust(10)
 
-                                # lineNew = str(word[0]).ljust(5) + word[1].ljust(30) + word[2].ljust(20) + str(word[3]).ljust(10) + 'NULL'.ljust(10)
                                 print(lineNew)
                         print("--------------------------------------------------------------------------------")
 
@@ -403,12 +450,14 @@ def doCommand(queUser):
 
         elif queUser=='13':
                 PfId=int(input("Performance ID: "))
-
+                if checkPerformance(PfId) is False:
+                        print("Performance {0} doesn't exist".format(str(PfId)))
+                        return
+                
                 tmp13=runQuery1Arg(sqlv.selectAudienceIdInBookingUsingPlayId, PfId)
 
                 #Print the result of the search
                 tmp13=sortTuple(tmp13)
-                #print(tmp13)
                         
                 print("--------------------------------------------------------------------------------")
                 lineIndex = 'id'.ljust(5) + 'name'.ljust(30) + 'gender'.ljust(20) + 'age'.ljust(10)
@@ -425,6 +474,10 @@ def doCommand(queUser):
 
         elif queUser=='14':
                 PfId=int(input("Performance ID: "))
+                
+                if checkPerformance(PfId) is False:
+                        print("Performance {0} doesn't exist".format(str(PfId)))
+                        return
                 
                 tmp14=runQuery1Arg(sqlv.selectInPlay, PfId)
                 
@@ -508,9 +561,3 @@ cntn.close()
 
 # commit
 #cntn.commit()
-
-#template
-'''#CREATE TABLE hello (
-                   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
-            );
-'''
