@@ -1,5 +1,4 @@
 #todo: implement cascading deletion
- #todo: implement labeling point in price number
 
 import pymysql, sys, math
 import sqlStatementVundle as sqlv
@@ -35,6 +34,12 @@ def truncateString(rawString):
 
 def addCommas(val):
         return format(val,",")
+
+def initList(capa):
+        raw=list()
+        for i in range(1,capa+1):
+                raw.append( [i, '' ] )
+        return raw
 
 def checkDB():
         cursor.execute('''show tables;''')
@@ -416,17 +421,23 @@ def doCommand(queUser):
                 #Get capacity of the building
                 BdId = tmp14[0][4]
                 tmp14_1 = runQuery1Arg(sqlv.selectCapacityInTheater, str( BdId))
-                print(tmp14_1)
                 capa = tmp14_1[0][0]
-                print(capa)
-                #Print the result of the search
+                
+                # Preprocess arguments
                 tmp14=runQuery1Arg(sqlv.selectInBookingUsingPlayId, PfId)
-                tmp14 = sortTuple(tmp14)
+                
+                list_rst14 = initList(capa)
+
+                for elem in tmp14:
+                        updateIdx=elem[0]-1
+                        list_rst14[updateIdx][1]=elem[1]
+                        
+                #Print the result of the search                
                 print("--------------------------------------------------------------------------------")
                 lineIndex = 'seat_number'.ljust(20) + 'audience_id'.ljust(20)
                 print(lineIndex)
                 print("--------------------------------------------------------------------------------")        
-                for bookingRecord in tmp14:
+                for bookingRecord in list_rst14:
                         word=bookingRecord
                         lineNew = str(word[0]).ljust(20) + str(word[1]).ljust(20)
                         print(lineNew)                        
